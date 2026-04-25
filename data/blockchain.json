@@ -1,0 +1,42 @@
+[
+  {
+    "index": 0,
+    "timestamp": "2026-03-28 01:08:17",
+    "event_type": "USER_REGISTERED",
+    "data": "kaustubhk033@gmail.com|LOW|New account created",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "f8974396f90f1686814ffbd50982e68d2496a8e86f6069789521fa80a9b0d0b7"
+  },
+  {
+    "index": 1,
+    "timestamp": "2026-03-28 01:08:17",
+    "event_type": "NEW_USER",
+    "data": "kaustubhk033@gmail.com",
+    "prev_hash": "f8974396f90f1686814ffbd50982e68d2496a8e86f6069789521fa80a9b0d0b7",
+    "hash": "a71e5b02df113df5a31067477418fe91b9747878d1a210216a5fc59838bd5fa8"
+  },
+  {
+    "index": 2,
+    "timestamp": "2026-03-28 01:09:15",
+    "event_type": "SUSPICIOUS_EMAIL",
+    "data": "kaustubhk033@gmail.com|HIGH|Score:45.3%",
+    "prev_hash": "a71e5b02df113df5a31067477418fe91b9747878d1a210216a5fc59838bd5fa8",
+    "hash": "8453fbe2bd12d9467fb75725216c6afb9d0ae7633a1589ab9cc3e6006880168e"
+  },
+  {
+    "index": 3,
+    "timestamp": "2026-04-25 00:14:53",
+    "event_type": "USER_LOGIN",
+    "data": "kaustubhk033@gmail.com|LOW|Successful login",
+    "prev_hash": "8453fbe2bd12d9467fb75725216c6afb9d0ae7633a1589ab9cc3e6006880168e",
+    "hash": "95b6af28616b04b37424fbc8f40f3f0dd3879a7182ed1ea7c0e779a9e22ae006"
+  },
+  {
+    "index": 4,
+    "timestamp": "2026-04-25 00:16:57",
+    "event_type": "PHISHING_DETECTED",
+    "data": "kaustubhk033@gmail.com|CRITICAL|Score:100% | Words:13 | URLs:1",
+    "prev_hash": "95b6af28616b04b37424fbc8f40f3f0dd3879a7182ed1ea7c0e779a9e22ae006",
+    "hash": "a56638b0822ab86e827ea6c00e4925e5e8ed120dfe1cee4b0b299dea7925b9ad"
+  }
+]

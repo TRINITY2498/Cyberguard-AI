@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CyberGuard AI — SIEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020608;--s1:#061018;--s2:#0a1a28;--g1:#00f5c4;--g2:#00aaff;--danger:#f43f5e;--warn:#f59e0b;--text:#d1f0ff;--muted:#4a7a9b;--border:rgba(0,245,196,0.1);--orb:Orbitron,monospace;--body:Rajdhani,sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,196,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,196,0.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:200;height:62px;background:rgba(2,6,8,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 24px;gap:20px}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.nav-logo{width:34px;height:34px}
+.nav-logo svg{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(0,245,196,0.4))}
+.nav-name{font-family:var(--orb);font-size:14px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-link{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--orb);font-size:9px;font-weight:600;letter-spacing:1.5px;transition:all 0.2s;border:1px solid transparent;text-transform:uppercase}
+.nav-link:hover,.nav-link.active{color:var(--g1);border-color:rgba(0,245,196,0.2);background:rgba(0,245,196,0.05)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-badge{font-family:var(--orb);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:6px 12px;border-radius:7px}
+.btn-logout{padding:7px 14px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:8px;color:var(--danger);font-family:var(--orb);font-size:9px;cursor:pointer;text-decoration:none;transition:all 0.2s;text-transform:uppercase;letter-spacing:1px}
+.page{max-width:1200px;margin:0 auto;padding:32px 24px;position:relative;z-index:1}
+.page-title{font-family:var(--orb);font-size:24px;font-weight:900;margin-bottom:6px}
+.page-title span{background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-sub{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:28px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent)}
+.card-title{font-family:var(--orb);font-size:10px;color:var(--g1);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.sc-val{font-family:var(--orb);font-size:28px;font-weight:900;margin-bottom:4px}
+.sc-label{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+/* Event table */
+.ev-table{width:100%;border-collapse:collapse}
+.ev-table th{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.ev-table td{padding:10px 12px;border-bottom:1px solid rgba(0,245,196,0.05);font-size:12px;font-weight:500;vertical-align:middle}
+.ev-table tr:hover td{background:rgba(0,245,196,0.02)}
+.sev-badge{font-family:var(--orb);font-size:8px;letter-spacing:1px;padding:3px 8px;border-radius:5px;border:1px solid;text-transform:uppercase}
+.sev-critical{background:rgba(244,63,94,0.15);border-color:rgba(244,63,94,0.4);color:#f87171}
+.sev-high{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:var(--warn)}
+.sev-medium{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:#fbbf24}
+.sev-low{background:rgba(0,245,196,0.1);border-color:rgba(0,245,196,0.25);color:var(--g1)}
+.ev-id{font-family:var(--orb);font-size:9px;color:var(--muted)}
+.ev-type{font-family:var(--orb);font-size:9px;color:var(--g2)}
+/* Blockchain */
+.block-item{background:rgba(0,0,0,0.4);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:14px;margin-bottom:8px;position:relative}
+.block-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#7c3aed,#a78bfa);border-radius:3px 0 0 3px}
+.block-index{font-family:var(--orb);font-size:9px;color:#a78bfa;letter-spacing:1px;margin-bottom:6px}
+.block-hash{font-family:var(--orb);font-size:9px;color:var(--muted);word-break:break-all;margin-bottom:4px}
+.block-data{font-family:var(--orb);font-size:9px;color:var(--text);margin-bottom:4px}
+.block-valid{font-family:var(--orb);font-size:8px;padding:2px 8px;border-radius:4px;border:1px solid;display:inline-block}
+.bv-ok{color:var(--g1);border-color:rgba(0,245,196,0.3);background:rgba(0,245,196,0.08)}
+.bv-fail{color:var(--danger);border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.08)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/dashboard" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 34 34" fill="none"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00f5c4"/><stop offset="100%" style="stop-color:#00aaff"/></linearGradient></defs><path d="M17 2L5 7.5v12.5C5 27.3 10.4 33.4 17 35c6.6-1.6 12-7.7 12-15V7.5L17 2z" fill="rgba(0,245,196,0.08)" stroke="url(#ng)" stroke-width="1.5"/><path d="M11 17l4 4 8-8" stroke="url(#ng)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="nav-name">CYBERGUARD AI</span>
+  </a>
+  <a href="/dashboard" class="nav-link">Dashboard</a>
+  <a href="/history" class="nav-link">History</a>
+  <a href="/siem" class="nav-link active">SIEM</a>
+  <a href="/compliance" class="nav-link">Compliance</a>
+  <div class="nav-right">
+    <span class="nav-badge">👤 {{ user_email }}</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 class="page-title">SIEM & <span>SOAR</span> Console</h1>
+  <p class="page-sub">// SECURITY INFORMATION & EVENT MANAGEMENT — REAL-TIME THREAT MONITORING</p>
+
+  <div class="stat-row">
+    <div class="sc"><div class="sc-val" id="se-total" style="color:var(--g2)">0</div><div class="sc-label">Total Events</div></div>
+    <div class="sc"><div class="sc-val" id="se-crit" style="color:var(--danger)">0</div><div class="sc-label">Critical</div></div>
+    <div class="sc"><div class="sc-val" id="se-high" style="color:var(--warn)">0</div><div class="sc-label">High</div></div>
+    <div class="sc"><div class="sc-val" id="se-bc" style="color:#a78bfa">0</div><div class="sc-label">Blockchain Blocks</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📡 Live Security Event Log</div>
+    <div style="overflow-x:auto">
+      <table class="ev-table">
+        <thead><tr><th>Event ID</th><th>Timestamp</th><th>Type</th><th>Severity</th><th>User</th><th>Details</th></tr></thead>
+        <tbody id="siem-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;font-family:var(--orb);font-size:9px;color:var(--muted)">Loading events...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔗 Blockchain Audit Ledger — Last 10 Blocks</div>
+    <div id="chain-valid-banner" style="margin-bottom:14px;font-family:var(--orb);font-size:9px;padding:10px 14px;border-radius:8px;border:1px solid"></div>
+    <div id="blockchain-list"></div>
+  </div>
+</div>
+
+<script>
+async function load(){
+  const [evRes, bcRes] = await Promise.all([fetch('/api/siem_events'), fetch('/api/blockchain')]);
+  const events = await evRes.json();
+  const bcData = await bcRes.json();
+
+  document.getElementById('se-total').textContent = events.length;
+  document.getElementById('se-crit').textContent = events.filter(e=>e.severity==='CRITICAL').length;
+  document.getElementById('se-high').textContent = events.filter(e=>e.severity==='HIGH').length;
+  document.getElementById('se-bc').textContent = bcData.total_blocks;
+
+  const sevClass = {'CRITICAL':'sev-critical','HIGH':'sev-high','MEDIUM':'sev-medium','LOW':'sev-low'};
+  const tbody = document.getElementById('siem-tbody');
+  if(events.length===0){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;font-family:var(--orb);font-size:9px;color:var(--muted)">No events yet — analyze emails to generate events</td></tr>'; }
+  else { tbody.innerHTML = events.slice(0,30).map(e=>`<tr><td class="ev-id">${e.id}</td><td style="font-size:11px;color:var(--muted)">${e.timestamp}</td><td class="ev-type">${e.event_type}</td><td><span class="sev-badge ${sevClass[e.severity]||'sev-low'}">${e.severity}</span></td><td style="font-size:11px">${e.user}</td><td style="font-size:11px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.details}</td></tr>`).join(''); }
+
+  const banner = document.getElementById('chain-valid-banner');
+  if(bcData.valid){ banner.style.cssText='background:rgba(0,245,196,0.07);border-color:rgba(0,245,196,0.3);color:var(--g1)'; banner.textContent=`✓ BLOCKCHAIN INTEGRITY VERIFIED — ${bcData.total_blocks} blocks, all hashes valid`; }
+  else { banner.style.cssText='background:rgba(244,63,94,0.07);border-color:rgba(244,63,94,0.3);color:var(--danger)'; banner.textContent='⚠ BLOCKCHAIN INTEGRITY VIOLATION DETECTED'; }
+
+  const bl = document.getElementById('blockchain-list');
+  if(!bcData.chain||bcData.chain.length===0){ bl.innerHTML='<div style="font-family:var(--orb);font-size:9px;color:var(--muted);text-align:center;padding:20px">No blocks yet</div>'; }
+  else { bl.innerHTML = bcData.chain.slice().reverse().map(b=>`<div class="block-item"><div class="block-index">Block #${b.index} — ${b.timestamp} — ${b.event_type}</div><div class="block-data">Data: ${b.data}</div><div class="block-hash">Hash: ${b.hash}</div><div class="block-hash" style="margin-bottom:8px">Prev: ${b.prev_hash}</div><span class="block-valid bv-ok">✓ HASH VALID</span></div>`).join(''); }
+}
+load();
+setInterval(load, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "AUD-0004",
+    "timestamp": "2026-04-25 00:16:58",
+    "user": "kaustubhk033@gmail.com",
+    "action": "EMAIL_ANALYSIS",
+    "resource": "phishing_detector",
+    "result": "Risk:High Phishing Risk Score:100%",
+    "ip": "127.0.0.1",
+    "compliance": "ISO27001 | GDPR | NIST"
+  },
+  {
+    "id": "AUD-0003",
+    "timestamp": "2026-04-25 00:14:53",
+    "user": "kaustubhk033@gmail.com",
+    "action": "LOGIN",
+    "resource": "auth_system",
+    "result": "SUCCESS",
+    "ip": "127.0.0.1",
+    "compliance": "ISO27001 | GDPR | NIST"
+  },
+  {
+    "id": "AUD-0002",
+    "timestamp": "2026-03-28 01:09:15",
+    "user": "kaustubhk033@gmail.com",
+    "action": "EMAIL_ANALYSIS",
+    "resource": "phishing_detector",
+    "result": "Risk:Suspicious Score:45.3%",
+    "ip": "127.0.0.1",
+    "compliance": "ISO27001 | GDPR | NIST"
+  },
+  {
+    "id": "AUD-0001",
+    "timestamp": "2026-03-28 01:08:17",
+    "user": "kaustubhk033@gmail.com",
+    "action": "REGISTER",
+    "resource": "auth_system",
+    "result": "SUCCESS",
+    "ip": "127.0.0.1",
+    "compliance": "ISO27001 | GDPR | NIST"
+  }
+]

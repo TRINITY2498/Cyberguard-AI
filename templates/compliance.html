@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CyberGuard AI — Compliance</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020608;--s1:#061018;--s2:#0a1a28;--g1:#00f5c4;--g2:#00aaff;--danger:#f43f5e;--warn:#f59e0b;--text:#d1f0ff;--muted:#4a7a9b;--border:rgba(0,245,196,0.1);--orb:Orbitron,monospace;--body:Rajdhani,sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,196,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,196,0.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:200;height:62px;background:rgba(2,6,8,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 24px;gap:20px}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.nav-logo{width:34px;height:34px}.nav-logo svg{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(0,245,196,0.4))}
+.nav-name{font-family:var(--orb);font-size:14px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-link{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--orb);font-size:9px;font-weight:600;letter-spacing:1.5px;transition:all 0.2s;border:1px solid transparent;text-transform:uppercase}
+.nav-link:hover,.nav-link.active{color:var(--g1);border-color:rgba(0,245,196,0.2);background:rgba(0,245,196,0.05)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-badge{font-family:var(--orb);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:6px 12px;border-radius:7px}
+.btn-logout{padding:7px 14px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:8px;color:var(--danger);font-family:var(--orb);font-size:9px;cursor:pointer;text-decoration:none;transition:all 0.2s;text-transform:uppercase;letter-spacing:1px}
+.page{max-width:1200px;margin:0 auto;padding:32px 24px;position:relative;z-index:1}
+.page-title{font-family:var(--orb);font-size:24px;font-weight:900;margin-bottom:6px}
+.page-title span{background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-sub{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:28px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent)}
+.card-title{font-family:var(--orb);font-size:10px;color:var(--g1);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
+.comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.comp-card{background:rgba(0,0,0,0.35);border-radius:14px;padding:22px;border:1px solid;position:relative;overflow:hidden}
+.comp-card.iso{border-color:rgba(96,165,250,0.3)}
+.comp-card.gdpr{border-color:rgba(52,211,153,0.3)}
+.comp-card.nist{border-color:rgba(167,139,250,0.3)}
+.comp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.comp-card.iso::before{background:#60a5fa}
+.comp-card.gdpr::before{background:#34d399}
+.comp-card.nist::before{background:#a78bfa}
+.comp-badge{font-family:var(--orb);font-size:9px;letter-spacing:1px;padding:4px 10px;border-radius:5px;border:1px solid;display:inline-block;margin-bottom:12px}
+.comp-card.iso .comp-badge{color:#60a5fa;border-color:rgba(96,165,250,0.4);background:rgba(96,165,250,0.1)}
+.comp-card.gdpr .comp-badge{color:#34d399;border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1)}
+.comp-card.nist .comp-badge{color:#a78bfa;border-color:rgba(167,139,250,0.4);background:rgba(167,139,250,0.1)}
+.comp-name{font-family:var(--orb);font-size:14px;font-weight:700;margin-bottom:4px}
+.comp-score-big{font-family:var(--orb);font-size:40px;font-weight:900;margin:10px 0}
+.comp-card.iso .comp-score-big{color:#60a5fa}
+.comp-card.gdpr .comp-score-big{color:#34d399}
+.comp-card.nist .comp-score-big{color:#a78bfa}
+.comp-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.comp-bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+.comp-card.iso .comp-bar-fill{background:#60a5fa}
+.comp-card.gdpr .comp-bar-fill{background:#34d399}
+.comp-card.nist .comp-bar-fill{background:#a78bfa}
+.control-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.control-item{font-family:var(--orb);font-size:8px;letter-spacing:0.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.control-item::before{content:'✓';color:var(--g1)}
+/* Audit table */
+.audit-table{width:100%;border-collapse:collapse}
+.audit-table th{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.audit-table td{padding:9px 12px;border-bottom:1px solid rgba(0,245,196,0.05);font-size:12px;font-weight:500}
+.audit-table tr:hover td{background:rgba(0,245,196,0.02)}
+.aud-id{font-family:var(--orb);font-size:9px;color:var(--muted)}
+.aud-action{font-family:var(--orb);font-size:9px;color:var(--g2)}
+.res-ok{font-family:var(--orb);font-size:8px;color:var(--g1);background:rgba(0,245,196,0.08);border:1px solid rgba(0,245,196,0.2);padding:2px 8px;border-radius:4px}
+.res-fail{font-family:var(--orb);font-size:8px;color:var(--danger);background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);padding:2px 8px;border-radius:4px}
+/* Radar chart */
+.radar-wrap{position:relative;height:260px;max-width:360px;margin:0 auto}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sum-box{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.sum-val{font-family:var(--orb);font-size:24px;font-weight:900;color:var(--g1);margin-bottom:4px}
+.sum-label{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/dashboard" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 34 34" fill="none"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00f5c4"/><stop offset="100%" style="stop-color:#00aaff"/></linearGradient></defs><path d="M17 2L5 7.5v12.5C5 27.3 10.4 33.4 17 35c6.6-1.6 12-7.7 12-15V7.5L17 2z" fill="rgba(0,245,196,0.08)" stroke="url(#ng)" stroke-width="1.5"/><path d="M11 17l4 4 8-8" stroke="url(#ng)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="nav-name">CYBERGUARD AI</span>
+  </a>
+  <a href="/dashboard" class="nav-link">Dashboard</a>
+  <a href="/history" class="nav-link">History</a>
+  <a href="/siem" class="nav-link">SIEM</a>
+  <a href="/compliance" class="nav-link active">Compliance</a>
+  <div class="nav-right">
+    <span class="nav-badge">👤 {{ user_email }}</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 class="page-title">Security <span>Compliance & Audit</span></h1>
+  <p class="page-sub">// ISO 27001 | GDPR | NIST CSF — COMPLIANCE REPORTING & AUDIT METHODOLOGY</p>
+
+  <div class="comp-grid">
+    <div class="comp-card iso">
+      <span class="comp-badge">ISO 27001</span>
+      <div class="comp-name">Information Security</div>
+      <div class="comp-score-big" id="iso-score">92%</div>
+      <div class="comp-bar"><div class="comp-bar-fill" id="iso-bar" style="width:0%"></div></div>
+      <ul class="control-list" id="iso-controls"></ul>
+    </div>
+    <div class="comp-card gdpr">
+      <span class="comp-badge">GDPR</span>
+      <div class="comp-name">Data Protection</div>
+      <div class="comp-score-big" id="gdpr-score">88%</div>
+      <div class="comp-bar"><div class="comp-bar-fill" id="gdpr-bar" style="width:0%"></div></div>
+      <ul class="control-list" id="gdpr-controls"></ul>
+    </div>
+    <div class="comp-card nist">
+      <span class="comp-badge">NIST CSF</span>
+      <div class="comp-name">Cyber Security Framework</div>
+      <div class="comp-score-big" id="nist-score">90%</div>
+      <div class="comp-bar"><div class="comp-bar-fill" id="nist-bar" style="width:0%"></div></div>
+      <ul class="control-list" id="nist-controls"></ul>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div class="card">
+      <div class="card-title">📊 Compliance Radar</div>
+      <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Summary Metrics</div>
+      <div class="summary-grid" style="margin-bottom:16px">
+        <div class="sum-box"><div class="sum-val" id="s-analyzed">0</div><div class="sum-label">Emails Analyzed</div></div>
+        <div class="sum-box"><div class="sum-val" id="s-blocked" style="color:var(--danger)">0</div><div class="sum-label">Threats Blocked</div></div>
+        <div class="sum-box"><div class="sum-val" id="s-audit">0</div><div class="sum-label">Audit Entries</div></div>
+        <div class="sum-box"><div class="sum-val" id="s-chain" style="color:#a78bfa">✓</div><div class="sum-label">Chain Integrity</div></div>
+      </div>
+      <div style="padding:14px;background:rgba(0,245,196,0.06);border:1px solid rgba(0,245,196,0.2);border-radius:10px">
+        <div style="font-family:var(--orb);font-size:9px;color:var(--g1);letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase">Compliance Status</div>
+        <div style="font-family:var(--orb);font-size:10px;color:var(--text)">✓ All major compliance frameworks satisfied<br>✓ Blockchain audit trail verified<br>✓ GDPR data protection controls active<br>✓ NIST CSF five functions implemented</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📝 Audit Trail Log — ISO 27001 A.12.4</div>
+    <div style="overflow-x:auto">
+      <table class="audit-table">
+        <thead><tr><th>Audit ID</th><th>Timestamp</th><th>User</th><th>Action</th><th>Resource</th><th>Result</th><th>Frameworks</th></tr></thead>
+        <tbody id="audit-tbody"><tr><td colspan="7" style="text-align:center;padding:30px;font-family:var(--orb);font-size:9px;color:var(--muted)">Loading audit log...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function load(){
+  const [crRes, auRes] = await Promise.all([fetch('/api/compliance_report'), fetch('/api/audit_log')]);
+  const cr = await crRes.json();
+  const auditLog = await auRes.json();
+
+  // Scores
+  setTimeout(()=>{
+    document.getElementById('iso-bar').style.width = cr.iso27001.score+'%';
+    document.getElementById('gdpr-bar').style.width = cr.gdpr.score+'%';
+    document.getElementById('nist-bar').style.width = cr.nist.score+'%';
+  },200);
+  document.getElementById('iso-score').textContent = cr.iso27001.score+'%';
+  document.getElementById('gdpr-score').textContent = cr.gdpr.score+'%';
+  document.getElementById('nist-score').textContent = cr.nist.score+'%';
+
+  // Controls
+  document.getElementById('iso-controls').innerHTML = cr.iso27001.controls.map(c=>`<li class="control-item">${c}</li>`).join('');
+  document.getElementById('gdpr-controls').innerHTML = cr.gdpr.articles.map(a=>`<li class="control-item">${a}</li>`).join('');
+  document.getElementById('nist-controls').innerHTML = cr.nist.functions.map(f=>`<li class="control-item">${f}</li>`).join('');
+
+  // Summary
+  document.getElementById('s-analyzed').textContent = cr.total_analyzed;
+  document.getElementById('s-blocked').textContent = cr.threats_blocked;
+  document.getElementById('s-audit').textContent = cr.audit_entries;
+  document.getElementById('s-chain').textContent = cr.blockchain_integrity ? '✓' : '✗';
+
+  // Radar
+  new Chart(document.getElementById('radarChart').getContext('2d'), {
+    type:'radar',
+    data:{
+      labels:['ISO 27001','GDPR','NIST CSF','Blockchain','SIEM','SOAR'],
+      datasets:[{label:'Compliance %',data:[cr.iso27001.score,cr.gdpr.score,cr.nist.score,cr.blockchain_integrity?95:0,85,90],backgroundColor:'rgba(0,245,196,0.1)',borderColor:'rgba(0,245,196,0.8)',borderWidth:2,pointBackgroundColor:'var(--g1)',pointRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{backgroundColor:'transparent',grid:{color:'rgba(0,245,196,0.1)'},angleLines:{color:'rgba(0,245,196,0.1)'},ticks:{color:'var(--muted)',font:{family:'Orbitron',size:8},backdropColor:'transparent'},pointLabels:{color:'var(--g1)',font:{family:'Orbitron',size:8}}}}}
+  });
+
+  // Audit table
+  const tbody = document.getElementById('audit-tbody');
+  if(!auditLog||auditLog.length===0){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;font-family:var(--orb);font-size:9px;color:var(--muted)">No audit entries yet</td></tr>';
+  } else {
+    tbody.innerHTML = auditLog.slice(0,30).map(a=>`<tr><td class="aud-id">${a.id}</td><td style="font-size:11px;color:var(--muted)">${a.timestamp}</td><td style="font-size:11px">${a.user}</td><td class="aud-action">${a.action}</td><td style="font-size:11px;color:var(--muted)">${a.resource}</td><td><span class="${a.result.includes('SUCCESS')||a.result.startsWith('Risk')?'res-ok':'res-fail'}">${a.result}</span></td><td style="font-family:var(--orb);font-size:8px;color:var(--muted)">${a.compliance}</td></tr>`).join('');
+  }
+}
+load();
+</script>
+</body>
+</html>

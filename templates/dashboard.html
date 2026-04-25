@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CyberGuard AI — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020608;--s1:#061018;--s2:#0a1a28;--s3:#0d2035;
+  --g1:#00f5c4;--g2:#00aaff;--g3:#7c3aed;
+  --danger:#f43f5e;--warn:#f59e0b;--safe:#00f5c4;
+  --text:#d1f0ff;--muted:#4a7a9b;--dim:#2a4a6b;
+  --border:rgba(0,245,196,0.1);--border2:rgba(0,170,255,0.12);
+  --orb:Orbitron,monospace;--body:Rajdhani,sans-serif;
+  --nav-h:62px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,196,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,196,0.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;height:var(--nav-h);background:rgba(2,6,8,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 24px;gap:20px}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.nav-logo{width:34px;height:34px;flex-shrink:0}
+.nav-logo svg{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(0,245,196,0.4))}
+.nav-name{font-family:var(--orb);font-size:14px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:4px}
+.nav-link{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--orb);font-size:9px;font-weight:600;letter-spacing:1.5px;transition:all 0.2s;border:1px solid transparent;text-transform:uppercase}
+.nav-link:hover,.nav-link.active{color:var(--g1);border-color:rgba(0,245,196,0.2);background:rgba(0,245,196,0.05)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-badge{font-family:var(--orb);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:6px 12px;border-radius:7px;letter-spacing:1px}
+.nav-status{display:flex;align-items:center;gap:6px;font-family:var(--orb);font-size:9px;color:var(--g1);letter-spacing:1px}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--g1);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,245,196,0.4)}50%{box-shadow:0 0 0 6px transparent}}
+.btn-logout{padding:7px 14px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:8px;color:var(--danger);font-family:var(--orb);font-size:9px;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all 0.2s;text-transform:uppercase}
+.btn-logout:hover{background:rgba(244,63,94,0.2)}
+
+/* ── LAYOUT ── */
+.page{max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1}
+
+/* ── HEADER STRIP ── */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.page-title{font-family:var(--orb);font-size:26px;font-weight:900;letter-spacing:1px;line-height:1.1}
+.page-title span{background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-sub{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:6px;text-transform:uppercase}
+.module-tags{display:flex;gap:8px;flex-wrap:wrap}
+.mtag{font-family:var(--orb);font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:6px;border:1px solid;text-transform:uppercase}
+.mtag.auth{color:#a78bfa;border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.08)}
+.mtag.crypto{color:#fbbf24;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)}
+.mtag.siem{color:#f87171;border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.08)}
+.mtag.soar{color:#34d399;border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.08)}
+.mtag.comp{color:#60a5fa;border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.08)}
+.mtag.threat{color:#fb923c;border-color:rgba(251,146,60,0.3);background:rgba(251,146,60,0.08)}
+
+/* ── TOP STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.stat-card:hover{border-color:rgba(0,245,196,0.25)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc-total::before{background:linear-gradient(90deg,var(--g1),var(--g2))}
+.sc-phish::before{background:linear-gradient(90deg,var(--danger),#ff6b6b)}
+.sc-susp::before{background:linear-gradient(90deg,var(--warn),#ffd700)}
+.sc-safe::before{background:linear-gradient(90deg,var(--safe),#00d4aa)}
+.sc-icon{font-size:24px;margin-bottom:10px}
+.sc-val{font-family:var(--orb);font-size:30px;font-weight:900;line-height:1;margin-bottom:4px}
+.sc-total .sc-val{color:var(--g2)}
+.sc-phish .sc-val{color:var(--danger)}
+.sc-susp .sc-val{color:var(--warn)}
+.sc-safe .sc-val{color:var(--safe)}
+.sc-label{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+
+/* ── ANALYZER CARD ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.card-header-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+.card-title{font-family:var(--orb);font-size:10px;color:var(--g1);letter-spacing:2.5px;text-transform:uppercase;white-space:nowrap}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent)}
+
+.section-lbl{font-family:var(--orb);font-size:9px;color:var(--g1);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+textarea{width:100%;min-height:180px;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:12px;padding:16px;color:var(--text);font-family:var(--body);font-size:14px;font-weight:400;line-height:1.7;resize:vertical;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+textarea:focus{border-color:var(--g1);box-shadow:0 0 0 3px rgba(0,245,196,0.06)}
+textarea::placeholder{color:var(--muted)}
+
+.btn-analyze{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#000;border:none;border-radius:12px;font-family:var(--orb);font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;margin-top:16px;position:relative;overflow:hidden;transition:all 0.25s;text-transform:uppercase}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,245,196,0.25)}
+.btn-analyze:active{transform:translateY(0)}
+.btn-analyze.loading{opacity:0.8;pointer-events:none}
+.spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite;display:none}
+.btn-analyze.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULTS ── */
+#result-section{display:none;margin-top:20px}
+.result-anim{animation:fadeUp 0.4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Risk banner */
+.risk-banner{display:flex;align-items:center;gap:18px;padding:20px 24px;border-radius:14px;margin-bottom:20px;border:1px solid;position:relative;overflow:hidden}
+.risk-banner::before{content:'';position:absolute;inset:0;opacity:0.05}
+.rb-safe{background:rgba(0,245,196,0.06);border-color:rgba(0,245,196,0.35)}
+.rb-safe::before{background:var(--g1)}
+.rb-suspicious{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.35)}
+.rb-suspicious::before{background:var(--warn)}
+.rb-phishing{background:rgba(244,63,94,0.06);border-color:rgba(244,63,94,0.35)}
+.rb-phishing::before{background:var(--danger)}
+
+/* Gauge */
+.gauge{position:relative;width:76px;height:76px;flex-shrink:0}
+.gauge svg{transform:rotate(-90deg)}
+.gauge-track{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:6}
+.gauge-fill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)}
+.gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-num{font-family:var(--orb);font-size:15px;font-weight:900;line-height:1}
+.gauge-pct{font-family:var(--orb);font-size:9px;color:var(--muted)}
+.g-safe .gauge-fill{stroke:var(--safe)} .g-safe .gauge-num{color:var(--safe)}
+.g-suspicious .gauge-fill{stroke:var(--warn)} .g-suspicious .gauge-num{color:var(--warn)}
+.g-phishing .gauge-fill{stroke:var(--danger)} .g-phishing .gauge-num{color:var(--danger)}
+
+.risk-info{flex:1}
+.risk-name{font-family:var(--orb);font-size:18px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+.rb-safe .risk-name{color:var(--safe)} .rb-suspicious .risk-name{color:var(--warn)} .rb-phishing .risk-name{color:var(--danger)}
+.risk-sub{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.risk-icon-big{font-size:32px}
+
+/* Detail grids */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.det-box{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;padding:14px}
+.det-title{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:4px 9px;border-radius:6px;font-family:var(--orb);font-size:9px;letter-spacing:0.5px;border:1px solid}
+.tag-sus{background:rgba(244,63,94,0.1);border-color:rgba(244,63,94,0.3);color:#ff6b8a}
+.tag-safe{background:rgba(0,245,196,0.1);border-color:rgba(0,245,196,0.25);color:var(--g1)}
+.tag-warn{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--warn)}
+.empty{font-family:var(--orb);font-size:9px;color:var(--muted)}
+
+/* Threat categories */
+.threat-cats{margin-bottom:16px}
+.tcat{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.2);border-radius:8px;margin-bottom:6px}
+.tcat-name{font-family:var(--orb);font-size:9px;color:#ff6b8a;letter-spacing:1px;flex:1}
+.tcat-hits{font-family:var(--orb);font-size:8px;color:var(--muted)}
+
+/* SOAR actions */
+.soar-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.soar-item{font-family:var(--body);font-size:13px;font-weight:500;padding:8px 12px;background:rgba(0,0,0,0.3);border-radius:8px;border-left:3px solid var(--g1);color:var(--text)}
+
+/* Explanation */
+.explain-box{background:rgba(0,0,0,0.35);border-left:3px solid var(--g2);border-radius:0 10px 10px 0;padding:14px 16px;font-size:14px;font-weight:500;line-height:1.7;color:var(--text)}
+.explain-box.ex-phish{border-left-color:var(--danger)}
+.explain-box.ex-susp{border-left-color:var(--warn)}
+
+/* URL list */
+.url-item{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+.url-text{font-family:var(--orb);font-size:10px;color:var(--g2);word-break:break-all;margin-bottom:6px}
+.url-flag{font-size:12px;font-weight:500;color:var(--warn);display:flex;align-items:center;gap:6px;margin-top:3px}
+.url-flag::before{content:'⚠'}
+
+/* Crypto box */
+.crypto-box{background:rgba(0,0,0,0.4);border:1px solid rgba(124,58,237,0.3);border-radius:10px;padding:12px;margin-bottom:16px}
+.crypto-label{font-family:var(--orb);font-size:9px;color:#a78bfa;letter-spacing:2px;margin-bottom:8px;text-transform:uppercase}
+.crypto-text{font-family:var(--orb);font-size:9px;color:var(--muted);word-break:break-all;line-height:1.6}
+
+/* Compliance chips */
+.comp-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.comp-chip{font-family:var(--orb);font-size:8px;letter-spacing:1px;padding:4px 10px;border-radius:5px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);color:#60a5fa}
+
+/* ── RIGHT SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;gap:16px}
+
+/* Live metrics */
+.metric-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.metric-item:last-child{border-bottom:none}
+.metric-bar-wrap{flex:1}
+.metric-label{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.metric-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.metric-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.mf-red{background:linear-gradient(90deg,var(--danger),#ff6b6b)}
+.mf-yellow{background:linear-gradient(90deg,var(--warn),#ffd700)}
+.mf-green{background:linear-gradient(90deg,var(--safe),#00d4aa)}
+.mf-blue{background:linear-gradient(90deg,var(--g2),#60a5fa)}
+.metric-val{font-family:var(--orb);font-size:12px;font-weight:700;min-width:36px;text-align:right}
+
+/* Mini chart */
+.chart-wrap{position:relative;height:180px}
+
+/* Module status list */
+.mod-list{display:flex;flex-direction:column;gap:6px}
+.mod-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,0.3);border-radius:9px;border:1px solid var(--border)}
+.mod-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mod-active{background:var(--g1);box-shadow:0 0 6px rgba(0,245,196,0.5)}
+.mod-name{font-family:var(--orb);font-size:9px;color:var(--text);letter-spacing:1px;text-transform:uppercase;flex:1}
+.mod-status{font-family:var(--orb);font-size:8px;color:var(--g1);letter-spacing:1px}
+
+/* Tabs inside result */
+.result-tabs{display:flex;gap:4px;background:rgba(0,0,0,0.3);border-radius:9px;padding:3px;margin-bottom:16px;border:1px solid var(--border)}
+.rtab{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);font-family:var(--orb);font-size:8px;letter-spacing:1px;border-radius:7px;cursor:pointer;transition:all 0.2s;text-transform:uppercase}
+.rtab.active{background:rgba(0,245,196,0.15);color:var(--g1);border:1px solid rgba(0,245,196,0.2)}
+
+.rtab-panel{display:none}
+.rtab-panel.active{display:block}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/dashboard" class="nav-brand">
+    <div class="nav-logo">
+      <svg viewBox="0 0 34 34" fill="none"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00f5c4"/><stop offset="100%" style="stop-color:#00aaff"/></linearGradient></defs><path d="M17 2L5 7.5v12.5C5 27.3 10.4 33.4 17 35c6.6-1.6 12-7.7 12-15V7.5L17 2z" fill="rgba(0,245,196,0.08)" stroke="url(#ng)" stroke-width="1.5"/><path d="M11 17l4 4 8-8" stroke="url(#ng)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="nav-name">CYBERGUARD AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="/dashboard" class="nav-link active">Dashboard</a>
+    <a href="/history" class="nav-link">History</a>
+    <a href="/siem" class="nav-link">SIEM</a>
+    <a href="/compliance" class="nav-link">Compliance</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-status"><div class="dot-live"></div><span>LIVE</span></div>
+    <span class="nav-badge">👤 {{ user_email }}</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">AI Phishing Email <span>Detector</span></h1>
+      <p class="page-sub">// Advanced Threat Detection & Analysis Platform</p>
+    </div>
+    <div class="module-tags">
+      <span class="mtag auth">🔐 Auth & Identity</span>
+      <span class="mtag crypto">🔗 Cryptography & Blockchain</span>
+      <span class="mtag siem">📡 SIEM & SOAR</span>
+      <span class="mtag comp">📋 Compliance & Audit</span>
+      <span class="mtag threat">🎯 Threat Management</span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card sc-total">
+      <div class="sc-icon">📊</div>
+      <div class="sc-val" id="st-total">0</div>
+      <div class="sc-label">Total Analyzed</div>
+    </div>
+    <div class="stat-card sc-phish">
+      <div class="sc-icon">🚨</div>
+      <div class="sc-val" id="st-phish">0</div>
+      <div class="sc-label">Phishing Detected</div>
+    </div>
+    <div class="stat-card sc-susp">
+      <div class="sc-icon">⚠️</div>
+      <div class="sc-val" id="st-susp">0</div>
+      <div class="sc-label">Suspicious</div>
+    </div>
+    <div class="stat-card sc-safe">
+      <div class="sc-icon">✅</div>
+      <div class="sc-val" id="st-safe">0</div>
+      <div class="sc-label">Safe</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+    <!-- LEFT: Analyzer -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📧 Email Analysis Engine</div>
+          <div class="card-header-line"></div>
+        </div>
+        <div class="section-lbl">Paste Email Content</div>
+        <textarea id="email-input" placeholder="Paste the full email here — headers, body, links, everything...
+
+Example phishing email:
+From: security@paypa1-alerts.xyz
+Subject: URGENT: Your account has been suspended!
+
+Dear Customer, we detected unusual activity on your account.
+Click here immediately to verify your credentials:
+http://192.168.1.paypal-secure.xyz/verify?user=you
+
+Failure to verify within 24 hours will result in permanent account suspension.
+Your bank details and password are required for verification."></textarea>
+        <button class="btn-analyze" id="analyze-btn" onclick="analyzeEmail()">
+          <div class="spinner"></div>
+          <span id="btn-text">🔍 ANALYZE EMAIL</span>
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="result-section">
+        <div class="card result-anim" style="margin-top:20px">
+          <div class="card-header">
+            <div class="card-title">🎯 Analysis Result</div>
+            <div class="card-header-line"></div>
+          </div>
+
+          <!-- Risk Banner -->
+          <div class="risk-banner" id="risk-banner">
+            <div class="gauge" id="gauge">
+              <svg viewBox="0 0 76 76" width="76" height="76">
+                <circle class="gauge-track" cx="38" cy="38" r="30"/>
+                <circle class="gauge-fill" id="gauge-fill" cx="38" cy="38" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+              </svg>
+              <div class="gauge-text"><span class="gauge-num" id="gauge-num">0</span><span class="gauge-pct">RISK%</span></div>
+            </div>
+            <div class="risk-info">
+              <div class="risk-name" id="risk-name">—</div>
+              <div class="risk-sub" id="risk-sub">AI Phishing Probability Score</div>
+            </div>
+            <div class="risk-icon-big" id="risk-icon">🔍</div>
+          </div>
+
+          <!-- Result Tabs -->
+          <div class="result-tabs">
+            <button class="rtab active" onclick="switchRTab(0)">Overview</button>
+            <button class="rtab" onclick="switchRTab(1)">Threats</button>
+            <button class="rtab" onclick="switchRTab(2)">URLs</button>
+            <button class="rtab" onclick="switchRTab(3)">SOAR</button>
+            <button class="rtab" onclick="switchRTab(4)">Crypto</button>
+          </div>
+
+          <!-- Tab 0: Overview -->
+          <div class="rtab-panel active" id="rtp-0">
+            <div class="detail-grid">
+              <div class="det-box">
+                <div class="det-title">⚠ Suspicious Keywords</div>
+                <div class="tag-list" id="sus-words"></div>
+              </div>
+              <div class="det-box">
+                <div class="det-title">🔗 URLs Found</div>
+                <div id="url-summary"></div>
+              </div>
+            </div>
+            <div class="section-lbl" style="margin-bottom:10px">AI Explanation</div>
+            <div class="explain-box" id="explanation"></div>
+            <div class="comp-row" id="comp-tags"></div>
+          </div>
+
+          <!-- Tab 1: Threat Categories -->
+          <div class="rtab-panel" id="rtp-1">
+            <div class="section-lbl" style="margin-bottom:12px">🎯 Threat Category Analysis</div>
+            <div id="threat-cats-list"></div>
+            <div style="margin-top:14px;padding:12px;background:rgba(251,146,60,0.07);border:1px solid rgba(251,146,60,0.2);border-radius:10px">
+              <div style="font-family:var(--orb);font-size:9px;color:#fb923c;letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase">Cyber Threat Intelligence</div>
+              <div id="threat-intel-text" style="font-size:13px;font-weight:500;line-height:1.7;color:var(--text)"></div>
+            </div>
+          </div>
+
+          <!-- Tab 2: URLs -->
+          <div class="rtab-panel" id="rtp-2">
+            <div class="section-lbl" style="margin-bottom:12px">🔗 URL Security Analysis</div>
+            <div id="url-detail-list"></div>
+          </div>
+
+          <!-- Tab 3: SOAR -->
+          <div class="rtab-panel" id="rtp-3">
+            <div class="section-lbl" style="margin-bottom:12px">⚡ SOAR Automated Response</div>
+            <ul class="soar-list" id="soar-list"></ul>
+            <div style="margin-top:14px;padding:12px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px">
+              <div style="font-family:var(--orb);font-size:9px;color:#34d399;letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase">SIEM Event Logged</div>
+              <div id="siem-status" style="font-family:var(--orb);font-size:10px;color:var(--muted)"></div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Cryptography -->
+          <div class="rtab-panel" id="rtp-4">
+            <div class="section-lbl" style="margin-bottom:12px">🔐 Cryptography & Blockchain</div>
+            <div class="crypto-box">
+              <div class="crypto-label">🔐 AES-256 Encrypted Email Preview (Fernet)</div>
+              <div class="crypto-text" id="crypto-text">—</div>
+            </div>
+            <div style="padding:12px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.25);border-radius:10px;margin-bottom:12px">
+              <div style="font-family:var(--orb);font-size:9px;color:#a78bfa;letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase">🔗 Blockchain Audit Entry</div>
+              <div style="font-family:var(--orb);font-size:9px;color:var(--muted);line-height:1.8" id="blockchain-info">This analysis event has been recorded as an immutable block in the audit blockchain. Each block contains a SHA-256 hash linking it to the previous block, ensuring tamper-proof security event logging.</div>
+            </div>
+            <div style="padding:12px;background:rgba(0,170,255,0.06);border:1px solid rgba(0,170,255,0.2);border-radius:10px">
+              <div style="font-family:var(--orb);font-size:9px;color:var(--g2);letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase">Hash Algorithm</div>
+              <div style="font-family:var(--orb);font-size:9px;color:var(--muted)">SHA-256 | Fernet Symmetric Encryption | HMAC Integrity Verification</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="sidebar">
+      <!-- Module Status -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔧 Active Modules</div><div class="card-header-line"></div></div>
+        <div class="mod-list">
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">Auth & Identity Mgmt</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">AI/ML Classifier</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">Cryptography Engine</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">Blockchain Ledger</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">SIEM Event Logger</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">SOAR Auto-Response</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">Compliance Auditor</div><div class="mod-status">ACTIVE</div></div>
+          <div class="mod-item"><div class="mod-dot mod-active"></div><div class="mod-name">URL Threat Scanner</div><div class="mod-status">ACTIVE</div></div>
+        </div>
+      </div>
+
+      <!-- Threat Chart -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📊 Threat Distribution</div><div class="card-header-line"></div></div>
+        <div class="chart-wrap"><canvas id="threatChart"></canvas></div>
+        <div id="no-chart-msg" style="text-align:center;padding:40px 0;font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:1.5px;display:none">NO DATA YET<br><br>Analyze emails to see distribution</div>
+      </div>
+
+      <!-- Risk Metrics -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Risk Metrics</div><div class="card-header-line"></div></div>
+        <div class="metric-item">
+          <div class="metric-bar-wrap">
+            <div class="metric-label">Phishing Rate</div>
+            <div class="metric-bar"><div class="metric-fill mf-red" id="m-phish" style="width:0%"></div></div>
+          </div>
+          <div class="metric-val" id="mv-phish" style="color:var(--danger)">0%</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-bar-wrap">
+            <div class="metric-label">Suspicious Rate</div>
+            <div class="metric-bar"><div class="metric-fill mf-yellow" id="m-susp" style="width:0%"></div></div>
+          </div>
+          <div class="metric-val" id="mv-susp" style="color:var(--warn)">0%</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-bar-wrap">
+            <div class="metric-label">Safe Rate</div>
+            <div class="metric-bar"><div class="metric-fill mf-green" id="m-safe" style="width:0%"></div></div>
+          </div>
+          <div class="metric-val" id="mv-safe" style="color:var(--safe)">0%</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-bar-wrap">
+            <div class="metric-label">Avg Risk Score</div>
+            <div class="metric-bar"><div class="metric-fill mf-blue" id="m-avg" style="width:0%"></div></div>
+          </div>
+          <div class="metric-val" id="mv-avg" style="color:var(--g2)">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let chartInstance = null;
+
+async function loadStats(){
+  const res = await fetch('/api/stats');
+  const d = await res.json();
+  document.getElementById('st-total').textContent = d.total;
+  document.getElementById('st-phish').textContent = d.phishing;
+  document.getElementById('st-susp').textContent = d.suspicious;
+  document.getElementById('st-safe').textContent = d.safe;
+  if(d.total > 0){
+    const pp = Math.round(d.phishing/d.total*100);
+    const sp = Math.round(d.suspicious/d.total*100);
+    const sfp = Math.round(d.safe/d.total*100);
+    setMetric('phish', pp); setMetric('susp', sp); setMetric('safe', sfp);
+    document.getElementById('m-avg').style.width = d.avg_score+'%';
+    document.getElementById('mv-avg').textContent = d.avg_score+'%';
+    renderChart(d);
+  }
+}
+
+function setMetric(key, pct){
+  document.getElementById('m-'+key).style.width = pct+'%';
+  document.getElementById('mv-'+key).textContent = pct+'%';
+}
+
+function renderChart(d){
+  const canvas = document.getElementById('threatChart');
+  document.getElementById('no-chart-msg').style.display = 'none';
+  canvas.style.display = 'block';
+  if(chartInstance){ chartInstance.destroy(); }
+  chartInstance = new Chart(canvas.getContext('2d'), {
+    type:'doughnut',
+    data:{
+      labels:['Phishing','Suspicious','Safe'],
+      datasets:[{data:[d.phishing,d.suspicious,d.safe],backgroundColor:['rgba(244,63,94,0.8)','rgba(245,158,11,0.8)','rgba(0,245,196,0.8)'],borderColor:['#f43f5e','#f59e0b','#00f5c4'],borderWidth:2,hoverOffset:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{color:'#d1f0ff',font:{family:'Orbitron',size:9},padding:14,boxWidth:12}},
+      tooltip:{backgroundColor:'#061018',borderColor:'rgba(0,245,196,0.3)',borderWidth:1,titleColor:'#00f5c4',bodyColor:'#d1f0ff',titleFont:{family:'Orbitron'},bodyFont:{family:'Orbitron',size:9}}
+    },cutout:'60%'}
+  });
+}
+
+function switchRTab(i){
+  document.querySelectorAll('.rtab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  document.querySelectorAll('.rtab-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+}
+
+async function analyzeEmail(){
+  const email = document.getElementById('email-input').value.trim();
+  if(!email){ alert('Please paste email content first.'); return; }
+  const btn = document.getElementById('analyze-btn');
+  btn.classList.add('loading');
+  document.getElementById('btn-text').textContent = 'ANALYZING...';
+  document.getElementById('result-section').style.display='none';
+
+  const res = await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  const d = await res.json();
+  btn.classList.remove('loading');
+  document.getElementById('btn-text').textContent = '🔍 ANALYZE EMAIL';
+  if(d.error){ alert(d.error); return; }
+  renderResult(d);
+  loadStats();
+}
+
+function renderResult(d){
+  document.getElementById('result-section').style.display='block';
+  // Risk banner
+  const banner = document.getElementById('risk-banner');
+  banner.className = `risk-banner rb-${d.risk}`;
+  document.getElementById('risk-name').textContent = d.risk_label;
+  document.getElementById('risk-sub').textContent = `Phishing Probability: ${d.score}%`;
+  document.getElementById('risk-icon').textContent = d.risk==='safe'?'✅':d.risk==='suspicious'?'⚠️':'🚨';
+  // Gauge
+  const gauge = document.getElementById('gauge');
+  gauge.className = `gauge g-${d.risk}`;
+  document.getElementById('gauge-num').textContent = Math.round(d.score);
+  setTimeout(()=>{
+    const c = 188.5;
+    document.getElementById('gauge-fill').style.strokeDashoffset = c - (d.score/100)*c;
+  },100);
+  // Keywords
+  const sw = document.getElementById('sus-words');
+  sw.innerHTML = d.suspicious_words && d.suspicious_words.length>0
+    ? d.suspicious_words.map(w=>`<span class="tag tag-sus">${w}</span>`).join('')
+    : '<span class="empty">None detected</span>';
+  // URL summary
+  const us = document.getElementById('url-summary');
+  if(d.urls && d.urls.length>0){
+    const flagged = d.url_flags ? d.url_flags.length : 0;
+    us.innerHTML = `<span class="tag ${flagged>0?'tag-sus':'tag-safe'}">${d.urls.length} URL(s) — ${flagged>0?flagged+' flagged':'all clear'}</span>`;
+  } else { us.innerHTML='<span class="empty">No URLs found</span>'; }
+  // Explanation
+  const ex = document.getElementById('explanation');
+  ex.textContent = d.explanation;
+  ex.className = `explain-box ex-${d.risk}`;
+  // Compliance tags
+  document.getElementById('comp-tags').innerHTML = (d.compliance_tags||[]).map(t=>`<span class="comp-chip">${t}</span>`).join('');
+  // Threat categories
+  const tcl = document.getElementById('threat-cats-list');
+  if(d.threat_categories && Object.keys(d.threat_categories).length>0){
+    tcl.innerHTML = Object.entries(d.threat_categories).map(([cat,hits])=>`
+      <div class="tcat">
+        <div class="mod-dot mod-active"></div>
+        <div class="tcat-name">${cat}</div>
+        <div class="tcat-hits">${hits.slice(0,3).join(', ')}</div>
+      </div>`).join('');
+  } else { tcl.innerHTML='<span class="empty" style="font-family:var(--orb);font-size:9px">No threat categories identified — email appears safe</span>'; }
+  // Threat intel
+  const timap = {
+    safe:'No significant threat indicators detected. The email passed all AI and rule-based security checks.',
+    suspicious:'This email exhibits some indicators associated with social engineering or phishing attempts. Exercise caution before clicking any links or providing personal information.',
+    phishing:'HIGH THREAT: This email matches known phishing patterns. Indicators include credential harvesting, urgency manipulation, and/or suspicious URLs. Do NOT interact with this email.'
+  };
+  document.getElementById('threat-intel-text').textContent = timap[d.risk];
+  // URL details
+  const udl = document.getElementById('url-detail-list');
+  if(d.url_flags && d.url_flags.length>0){
+    udl.innerHTML = d.url_flags.map(u=>`<div class="url-item"><div class="url-text">${esc(u.url)}</div>${u.flags.map(f=>`<div class="url-flag">${esc(f)}</div>`).join('')}</div>`).join('');
+  } else if(d.urls && d.urls.length>0){
+    udl.innerHTML = d.urls.map(u=>`<div class="url-item"><div class="url-text">${esc(u)}</div><div style="font-family:var(--orb);font-size:9px;color:var(--g1);margin-top:4px">✓ No issues detected</div></div>`).join('');
+  } else { udl.innerHTML='<span class="empty" style="font-family:var(--orb);font-size:9px">No URLs found in this email</span>'; }
+  // SOAR
+  document.getElementById('soar-list').innerHTML = (d.soar_actions||[]).map(a=>`<li class="soar-item">${a}</li>`).join('');
+  document.getElementById('siem-status').textContent = `Event logged at ${d.timestamp} | Severity: ${d.risk==='phishing'?'CRITICAL':d.risk==='suspicious'?'HIGH':'LOW'} | ID: EVT-AUTO`;
+  // Crypto
+  document.getElementById('crypto-text').textContent = d.encrypted_preview || '—';
+  document.getElementById('result-section').scrollIntoView({behavior:'smooth',block:'start'});
+  // Switch to overview tab
+  switchRTab(0);
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+loadStats();
+// Show no-chart msg initially if no data
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  if(d.total===0){ document.getElementById('threatChart').style.display='none'; document.getElementById('no-chart-msg').style.display='block'; }
+});
+</script>
+</body>
+</html>

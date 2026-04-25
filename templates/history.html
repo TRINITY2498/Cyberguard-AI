@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CyberGuard AI — History</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#020608;--s1:#061018;--s2:#0a1a28;--g1:#00f5c4;--g2:#00aaff;--danger:#f43f5e;--warn:#f59e0b;--text:#d1f0ff;--muted:#4a7a9b;--border:rgba(0,245,196,0.1);--orb:Orbitron,monospace;--body:Rajdhani,sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,196,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,196,0.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:200;height:62px;background:rgba(2,6,8,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 24px;gap:20px}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.nav-logo{width:34px;height:34px}.nav-logo svg{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(0,245,196,0.4))}
+.nav-name{font-family:var(--orb);font-size:14px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-link{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-family:var(--orb);font-size:9px;font-weight:600;letter-spacing:1.5px;transition:all 0.2s;border:1px solid transparent;text-transform:uppercase}
+.nav-link:hover,.nav-link.active{color:var(--g1);border-color:rgba(0,245,196,0.2);background:rgba(0,245,196,0.05)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-badge{font-family:var(--orb);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:6px 12px;border-radius:7px}
+.btn-logout{padding:7px 14px;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:8px;color:var(--danger);font-family:var(--orb);font-size:9px;cursor:pointer;text-decoration:none;transition:all 0.2s;text-transform:uppercase;letter-spacing:1px}
+.page{max-width:1100px;margin:0 auto;padding:32px 24px;position:relative;z-index:1}
+.page-title{font-family:var(--orb);font-size:24px;font-weight:900;margin-bottom:6px}
+.page-title span{background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-sub{font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:28px}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),transparent)}
+.card-title{font-family:var(--orb);font-size:10px;color:var(--g1);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.sc{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px}
+.sc-val{font-family:var(--orb);font-size:28px;font-weight:900;margin-bottom:4px}
+.sc-label{font-family:var(--orb);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.chart-wrap{position:relative;height:220px}
+/* History items */
+.hi{display:flex;align-items:flex-start;gap:14px;padding:14px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;transition:border-color 0.2s}
+.hi:hover{border-color:rgba(0,245,196,0.25);background:rgba(0,245,196,0.02)}
+.hi-badge{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1px solid}
+.hi-safe{background:rgba(0,245,196,0.1);border-color:rgba(0,245,196,0.3)}
+.hi-suspicious{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3)}
+.hi-phishing{background:rgba(244,63,94,0.1);border-color:rgba(244,63,94,0.3)}
+.hi-content{flex:1;min-width:0}
+.hi-preview{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}
+.hi-meta{display:flex;gap:8px;flex-wrap:wrap}
+.hi-chip{font-family:var(--orb);font-size:8px;letter-spacing:1px;padding:3px 8px;border-radius:5px;border:1px solid;text-transform:uppercase}
+.chip-safe{color:var(--g1);border-color:rgba(0,245,196,0.3);background:rgba(0,245,196,0.08)}
+.chip-suspicious{color:var(--warn);border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08)}
+.chip-phishing{color:var(--danger);border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.08)}
+.hi-time{font-family:var(--orb);font-size:9px;color:var(--muted);margin-top:5px}
+.empty-state{text-align:center;padding:50px 20px;font-family:var(--orb);font-size:9px;color:var(--muted);letter-spacing:1.5px}
+.empty-state .ei{font-size:40px;margin-bottom:14px}
+.empty-state a{color:var(--g1);text-decoration:none}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/dashboard" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 34 34" fill="none"><defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00f5c4"/><stop offset="100%" style="stop-color:#00aaff"/></linearGradient></defs><path d="M17 2L5 7.5v12.5C5 27.3 10.4 33.4 17 35c6.6-1.6 12-7.7 12-15V7.5L17 2z" fill="rgba(0,245,196,0.08)" stroke="url(#ng)" stroke-width="1.5"/><path d="M11 17l4 4 8-8" stroke="url(#ng)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="nav-name">CYBERGUARD AI</span>
+  </a>
+  <a href="/dashboard" class="nav-link">Dashboard</a>
+  <a href="/history" class="nav-link active">History</a>
+  <a href="/siem" class="nav-link">SIEM</a>
+  <a href="/compliance" class="nav-link">Compliance</a>
+  <div class="nav-right">
+    <span class="nav-badge">👤 {{ user_email }}</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 class="page-title">Analysis <span>History</span></h1>
+  <p class="page-sub">// EMAIL ANALYSIS LOG — {{ user_email }}</p>
+
+  <div class="stat-row">
+    <div class="sc"><div class="sc-val" id="st-t" style="color:var(--g2)">0</div><div class="sc-label">Total</div></div>
+    <div class="sc"><div class="sc-val" id="st-p" style="color:var(--danger)">0</div><div class="sc-label">Phishing</div></div>
+    <div class="sc"><div class="sc-val" id="st-s" style="color:var(--warn)">0</div><div class="sc-label">Suspicious</div></div>
+    <div class="sc"><div class="sc-val" id="st-sf" style="color:var(--g1)">0</div><div class="sc-label">Safe</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div class="card">
+      <div class="card-title">📊 Threat Distribution</div>
+      <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 Risk Score Trend</div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 All Analyzed Emails</div>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<script>
+const ICONS={'safe':'✅','suspicious':'⚠️','phishing':'🚨'};
+const LABELS={'safe':'Safe','suspicious':'Suspicious','phishing':'High Phishing Risk'};
+
+async function load(){
+  const [hRes,sRes] = await Promise.all([fetch('/api/history'),fetch('/api/stats')]);
+  const history = await hRes.json();
+  const stats = await sRes.json();
+
+  document.getElementById('st-t').textContent = stats.total;
+  document.getElementById('st-p').textContent = stats.phishing;
+  document.getElementById('st-s').textContent = stats.suspicious;
+  document.getElementById('st-sf').textContent = stats.safe;
+
+  if(stats.total>0){
+    new Chart(document.getElementById('doughnutChart').getContext('2d'),{
+      type:'doughnut',
+      data:{labels:['Phishing','Suspicious','Safe'],datasets:[{data:[stats.phishing,stats.suspicious,stats.safe],backgroundColor:['rgba(244,63,94,0.8)','rgba(245,158,11,0.8)','rgba(0,245,196,0.8)'],borderColor:['#f43f5e','#f59e0b','#00f5c4'],borderWidth:2,hoverOffset:6}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#d1f0ff',font:{family:'Orbitron',size:8},padding:14,boxWidth:10}},tooltip:{backgroundColor:'#061018',borderColor:'rgba(0,245,196,0.3)',borderWidth:1,titleColor:'#00f5c4',bodyColor:'#d1f0ff',titleFont:{family:'Orbitron'},bodyFont:{family:'Orbitron',size:9}}},cutout:'58%'}
+    });
+    const recent = history.slice(0,15).reverse();
+    new Chart(document.getElementById('lineChart').getContext('2d'),{
+      type:'line',
+      data:{labels:recent.map((_,i)=>i+1),datasets:[{label:'Risk Score',data:recent.map(r=>r.score),borderColor:'#00f5c4',backgroundColor:'rgba(0,245,196,0.08)',borderWidth:2,pointBackgroundColor:'#00f5c4',pointRadius:4,tension:0.4,fill:true}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#061018',borderColor:'rgba(0,245,196,0.3)',borderWidth:1,titleColor:'#00f5c4',bodyColor:'#d1f0ff',callbacks:{label:ctx=>`Risk: ${ctx.raw}%`}}},scales:{y:{min:0,max:100,grid:{color:'rgba(0,245,196,0.06)'},ticks:{color:'var(--muted)',font:{family:'Orbitron',size:8}}},x:{grid:{color:'rgba(0,245,196,0.06)'},ticks:{color:'var(--muted)',font:{family:'Orbitron',size:8}}}}}
+    });
+  }
+
+  const list = document.getElementById('history-list');
+  if(!history||history.length===0){
+    list.innerHTML='<div class="empty-state"><div class="ei">📭</div><div>NO HISTORY YET<br><br><a href="/dashboard">Analyze your first email →</a></div></div>';
+    return;
+  }
+  list.innerHTML = history.map(item=>`
+    <div class="hi">
+      <div class="hi-badge hi-${item.risk}">${ICONS[item.risk]||'🔍'}</div>
+      <div class="hi-content">
+        <div class="hi-preview">${esc(item.email_preview||'')}</div>
+        <div class="hi-meta">
+          <span class="hi-chip chip-${item.risk}">${LABELS[item.risk]}</span>
+          <span class="hi-chip chip-${item.risk}">${item.score}% risk</span>
+          ${item.suspicious_words&&item.suspicious_words.length>0?`<span class="hi-chip chip-phishing">${item.suspicious_words.length} keyword(s)</span>`:''}
+          ${item.url_flags&&item.url_flags.length>0?`<span class="hi-chip chip-suspicious">${item.url_flags.length} flagged URL(s)</span>`:''}
+          ${item.threat_categories&&Object.keys(item.threat_categories).length>0?`<span class="hi-chip chip-phishing">${Object.keys(item.threat_categories).length} threat cat(s)</span>`:''}
+        </div>
+        <div class="hi-time">🕐 ${item.timestamp||''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+load();
+</script>
+</body>
+</html>

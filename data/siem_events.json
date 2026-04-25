@@ -1,0 +1,42 @@
+[
+  {
+    "id": "EVT-0004",
+    "timestamp": "2026-04-25 00:16:57",
+    "event_type": "PHISHING_DETECTED",
+    "severity": "CRITICAL",
+    "user": "kaustubhk033@gmail.com",
+    "details": "Score:100% | Words:13 | URLs:1",
+    "ip": "127.0.0.1",
+    "status": "OPEN"
+  },
+  {
+    "id": "EVT-0003",
+    "timestamp": "2026-04-25 00:14:53",
+    "event_type": "USER_LOGIN",
+    "severity": "LOW",
+    "user": "kaustubhk033@gmail.com",
+    "details": "Successful login",
+    "ip": "127.0.0.1",
+    "status": "OPEN"
+  },
+  {
+    "id": "EVT-0002",
+    "timestamp": "2026-03-28 01:09:15",
+    "event_type": "SUSPICIOUS_EMAIL",
+    "severity": "HIGH",
+    "user": "kaustubhk033@gmail.com",
+    "details": "Score:45.3%",
+    "ip": "127.0.0.1",
+    "status": "OPEN"
+  },
+  {
+    "id": "EVT-0001",
+    "timestamp": "2026-03-28 01:08:17",
+    "event_type": "USER_REGISTERED",
+    "severity": "LOW",
+    "user": "kaustubhk033@gmail.com",
+    "details": "New account created",
+    "ip": "127.0.0.1",
+    "status": "OPEN"
+  }
+]

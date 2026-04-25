@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberGuard AI — Secure Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020608;--s1:#061018;--s2:#0a1a28;
+  --g1:#00f5c4;--g2:#0af;--g3:#7c3aed;
+  --danger:#f43f5e;--warn:#f59e0b;
+  --text:#d1f0ff;--muted:#4a7a9b;
+  --border:rgba(0,245,196,0.13);
+  --orb:Orbitron,monospace;--body:Rajdhani,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+
+/* Particle canvas */
+#bg-canvas{position:fixed;inset:0;z-index:0;opacity:0.5}
+
+/* Scanlines */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:1}
+
+.wrap{position:relative;z-index:10;width:100%;max-width:460px;padding:20px}
+
+/* Logo area */
+.logo{text-align:center;margin-bottom:44px}
+.shield{width:80px;height:80px;margin:0 auto 18px;position:relative}
+.shield svg{width:100%;height:100%;filter:drop-shadow(0 0 12px rgba(0,245,196,0.5))}
+.logo-name{font-family:var(--orb);font-size:26px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-tag{font-family:var(--orb);font-size:9px;letter-spacing:4px;color:var(--muted);margin-top:6px;text-transform:uppercase}
+
+/* Status bar */
+.status-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:32px;font-family:var(--orb);font-size:9px;color:var(--g1);letter-spacing:2px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,245,196,0.4)}50%{opacity:0.7;box-shadow:0 0 0 6px transparent}}
+
+/* Card */
+.card{background:linear-gradient(135deg,rgba(10,26,40,0.95),rgba(6,16,24,0.98));border:1px solid var(--border);border-radius:20px;padding:40px;position:relative;overflow:hidden;backdrop-filter:blur(20px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g1),var(--g2),var(--g3),transparent)}
+.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,245,196,0.3),transparent)}
+
+/* Corner brackets */
+.corner{position:absolute;width:20px;height:20px;border-color:var(--g1);border-style:solid;opacity:0.6}
+.corner.tl{top:12px;left:12px;border-width:2px 0 0 2px}
+.corner.tr{top:12px;right:12px;border-width:2px 2px 0 0}
+.corner.bl{bottom:12px;left:12px;border-width:0 0 2px 2px}
+.corner.br{bottom:12px;right:12px;border-width:0 2px 2px 0}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,0.4);border-radius:12px;padding:4px;margin-bottom:32px;border:1px solid var(--border)}
+.tab{flex:1;padding:11px;border:none;background:transparent;color:var(--muted);font-family:var(--orb);font-size:11px;letter-spacing:2px;font-weight:600;border-radius:9px;cursor:pointer;transition:all 0.25s;text-transform:uppercase}
+.tab.active{background:linear-gradient(135deg,var(--g1),var(--g2));color:#000}
+
+/* Form */
+.form-group{margin-bottom:20px}
+label{display:block;font-family:var(--orb);font-size:9px;color:var(--g1);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:9px}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.5}
+input{width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:10px;padding:13px 16px 13px 42px;color:var(--text);font-family:var(--body);font-size:15px;font-weight:500;outline:none;transition:all 0.2s}
+input:focus{border-color:var(--g1);box-shadow:0 0 0 3px rgba(0,245,196,0.08),inset 0 0 20px rgba(0,245,196,0.03)}
+input::placeholder{color:var(--muted)}
+
+/* Button */
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-family:var(--orb);font-size:12px;font-weight:700;letter-spacing:3px;cursor:pointer;position:relative;overflow:hidden;margin-top:10px;transition:all 0.25s;text-transform:uppercase}
+.btn-primary{background:linear-gradient(135deg,var(--g1),var(--g2));color:#000}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,245,196,0.3)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary.loading{opacity:0.75;pointer-events:none}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,0.1),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.btn-primary:hover::before{transform:translateX(100%)}
+
+/* Alert */
+.alert{display:none;padding:12px 16px;border-radius:10px;font-family:var(--orb);font-size:10px;letter-spacing:1px;margin-bottom:18px;text-transform:uppercase}
+.alert.error{background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--danger)}
+.alert.success{background:rgba(0,245,196,0.1);border:1px solid rgba(0,245,196,0.3);color:var(--g1)}
+.alert.show{display:block}
+
+#signup-panel{display:none}
+
+/* Security badges */
+.badges{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}
+.badge{font-family:var(--orb);font-size:8px;letter-spacing:1.5px;color:var(--muted);border:1px solid rgba(74,122,155,0.3);border-radius:5px;padding:4px 8px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="wrap">
+  <div class="logo">
+    <div class="shield">
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00f5c4"/>
+            <stop offset="100%" style="stop-color:#00aaff"/>
+          </linearGradient>
+        </defs>
+        <path d="M40 5L10 17.5v25C10 58 23 71.5 40 76c17-4.5 30-18 30-33.5v-25L40 5z" fill="rgba(0,245,196,0.07)" stroke="url(#sg)" stroke-width="2"/>
+        <path d="M40 5L10 17.5v25C10 58 23 71.5 40 76c17-4.5 30-18 30-33.5v-25L40 5z" fill="none" stroke="rgba(0,245,196,0.2)" stroke-width="6" stroke-dasharray="4 4"/>
+        <path d="M28 40l8 8 16-16" stroke="url(#sg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="40" r="18" stroke="rgba(0,170,255,0.2)" stroke-width="1" stroke-dasharray="2 4"/>
+      </svg>
+    </div>
+    <div class="logo-name">CyberGuard AI</div>
+    <div class="logo-tag">Advanced Threat Detection System v2.0</div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span>SYSTEM OPERATIONAL</span>
+    <span style="opacity:0.3">|</span>
+    <span>ALL MODULES ACTIVE</span>
+  </div>
+
+  <div class="card">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+
+    <div class="alert" id="alert-msg"></div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Login</button>
+      <button class="tab" onclick="switchTab('signup')">Register</button>
+    </div>
+
+    <div id="login-panel">
+      <div class="form-group">
+        <label>Agent Email</label>
+        <div class="input-wrap"><span class="input-icon">👤</span><input type="email" id="li-email" placeholder="agent@cyberguard.io"></div>
+      </div>
+      <div class="form-group">
+        <label>Security Key</label>
+        <div class="input-wrap"><span class="input-icon">🔑</span><input type="password" id="li-pass" placeholder="••••••••••"></div>
+      </div>
+      <button class="btn btn-primary" id="li-btn" onclick="doLogin()">Access System</button>
+    </div>
+
+    <div id="signup-panel">
+      <div class="form-group">
+        <label>Full Name</label>
+        <div class="input-wrap"><span class="input-icon">🪪</span><input type="text" id="su-name" placeholder="Security Analyst"></div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-wrap"><span class="input-icon">📧</span><input type="email" id="su-email" placeholder="analyst@org.com"></div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap"><span class="input-icon">🔐</span><input type="password" id="su-pass" placeholder="Min 6 characters"></div>
+      </div>
+      <button class="btn btn-primary" id="su-btn" onclick="doSignup()">Create Account</button>
+    </div>
+
+    <div class="badges">
+      <span class="badge">🔐 AES-256</span>
+      <span class="badge">🔗 Blockchain</span>
+      <span class="badge">🛡️ ISO 27001</span>
+      <span class="badge">📋 GDPR</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Particle animation
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+const particles = Array.from({length:80},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,r:Math.random()*1.5+0.5,opacity:Math.random()*0.6+0.2}));
+function animParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+    if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,245,196,${p.opacity})`; ctx.fill();
+  });
+  particles.forEach((p,i)=>{
+    particles.slice(i+1).forEach(q=>{
+      const d=Math.hypot(p.x-q.x,p.y-q.y);
+      if(d<100){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=`rgba(0,245,196,${0.08*(1-d/100)})`;ctx.lineWidth=0.5;ctx.stroke()}
+    });
+  });
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight});
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='signup')));
+  document.getElementById('login-panel').style.display=t==='login'?'block':'none';
+  document.getElementById('signup-panel').style.display=t==='signup'?'block':'none';
+  hideAlert();
+}
+function showAlert(msg,type='error'){const el=document.getElementById('alert-msg');el.textContent=msg;el.className=`alert ${type} show`}
+function hideAlert(){document.getElementById('alert-msg').className='alert'}
+
+async function doLogin(){
+  const email=document.getElementById('li-email').value.trim();
+  const password=document.getElementById('li-pass').value;
+  if(!email||!password)return showAlert('⚠ All fields required');
+  const btn=document.getElementById('li-btn'); btn.textContent='AUTHENTICATING...'; btn.classList.add('loading');
+  const res=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const d=await res.json(); btn.textContent='ACCESS SYSTEM'; btn.classList.remove('loading');
+  if(d.success){showAlert('✓ ACCESS GRANTED — REDIRECTING','success');setTimeout(()=>window.location.href='/dashboard',900)}
+  else showAlert('✗ '+d.message);
+}
+async function doSignup(){
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const password=document.getElementById('su-pass').value;
+  if(!name||!email||!password)return showAlert('⚠ All fields required');
+  if(password.length<6)return showAlert('⚠ Password min 6 characters');
+  const btn=document.getElementById('su-btn'); btn.textContent='CREATING...'; btn.classList.add('loading');
+  const res=await fetch('/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+  const d=await res.json(); btn.textContent='CREATE ACCOUNT'; btn.classList.remove('loading');
+  if(d.success){showAlert('✓ ACCOUNT CREATED — REDIRECTING','success');setTimeout(()=>window.location.href='/dashboard',900)}
+  else showAlert('✗ '+d.message);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const lv=document.getElementById('login-panel').style.display!=='none';lv?doLogin():doSignup()}});
+</script>
+</body>
+</html>
